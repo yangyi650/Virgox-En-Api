@@ -1,23 +1,26 @@
-# Virgox Api
+[toc]
 
-* 本篇列出REST接口的baseurl:
-    **https://www.virgox.net**
-* 所有接口的响应都是JSON格式
-* 为保证接口正常访问，需联系客服提供ip地址
+# VirgoX API
 
+* The RESTful API base URL is: **https://www.virgox.net**
+* All the responses are formatted in JSON.
+* For API connection, please contact customer service to provide you IP address
 
 ----
-## 接口鉴权和签名 
 
-对于私有接口除了接口本身所需的参数外，需要传的参数包括`apiKey`，和`sign`，除去`sign`之外的参数都需要参与签名。
+## **Signature Rule** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey         | string   |  是   |  您的apiKey   |
-| sign          | string   |  是   |  请求签名   |
+Public endpoints do not require a sign, otherwise one must have a sign in requests to all endpoints that require it. `apiKey`, and `sign` are mandatory for private endpoints，all the parameters except `sign` are required for generating the signature.
 
-### 签名规则 
-* 1.将除sign以外的参数按参数名进行字典排序。
+| Parameter |  TYPE  | Mandatory |      note      |
+| :-------: | :----: | :-------: | :------------: |
+|  apiKey   | string |     Y     |  Your apiKey   |
+|   sign    | string |     Y     | Your signature |
+
+**Signature Rule** 
+
+* 1.Set parameters (except ‘sign’) as a dictionary ordered by set parameters names.
+
 ```json
 {
     "apiKey":"AAAAA",
@@ -29,25 +32,26 @@
     "type":"1"
 }
 ```
-* 排序后按顺序拼接参数的值AAAAABBBBB19000.11.2BTC/CAD1。
 
-* 对得到的值进行md5加密得到：b60743ad70bad7d1fc47777c0d58604e。
- 
-* 将md5后得到的值加入sign中作为参数传递。
+* Concatenate values of these parameters after sorting. You will have: AAAAABBBBB19000.11.2BTC/CAD1。
+
+* Apply MD5 encryption to the series above, you will have your sign: b60743ad70bad7d1fc47777c0d58604e。
+
+* Set the series above (your sign) as the value of the sign parameter to complete the request. 
 
 
-## **K线数据(蜡烛图)**
+## **Candlestick charts Data**
 
 * GET `/apis/api/market/history/kline`
 
-**请求参数**
+**Request Parameters **
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| symbol  | String  | 是  | 市场交易对,以”/”分开(如ETH/BTC)  |
-| period  | Int  | 是  | K线类型(1分钟 1 ，5分钟 5 ，15分钟 15 ，30分钟 30 ，1小时 60 ， 1天 1440 ，1周 10080，1个月 43200)  |
+| Parameter |  TYPE  | Mandatory |                             note                             |
+| :-------: | :----: | :-------: | :----------------------------------------------------------: |
+|  symbol   | String |     Y     |  Traded currency pair -- separated by /.  Such as ETH/USDT.  |
+|  period   |  Int   |     Y     | Frequency of candles, in minutes. Example: period=1 – 1 minute, period=60 – 1 hour, period=240 – 4 hours, period=10080 – 1 week. |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -69,31 +73,31 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | K线id   |
-| marketId        |  Int   | 市场id   |
-| low        |  Decimal   | 市场最低价   |
-| high        |  Decimal   | 市场最高价   |
-| close        |  Decimal   | 市场收盘价   |
-| open       |  Decimal   | 市场开盘价   |
-| qty       |  Decimal   | 交易数量   |
-| createTime       |  Long   | 时间戳   |
+| Parameter  |  type   |                  note                   |
+| :--------: | :-----: | :-------------------------------------: |
+|     id     |   Int   |            id of candlestick            |
+|  marketId  |   Int   |              id of market               |
+|    low     | Decimal |  lowest price for the requested period  |
+|    high    | Decimal | highest price for the requested period  |
+|   close    | Decimal |  close price for the requested period   |
+|    open    | Decimal |   open price for the requested period   |
+|    qty     | Decimal | trading volume for the requested period |
+| createTime |  Long   |           creation timestamp            |
 
 
-## **聚合行情(Ticker)**
+## **Ticker Data**
 
 * GET `/apis/api/market/detail/merged`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| symbol  | String  |  是 | 市场名称 币种名称后面需要加"/"和板块名称(btc/usdt)  |
+| Parameter |  TYPE  | Mandatory |                            note                            |
+| :-------: | :----: | :-------: | :--------------------------------------------------------: |
+|  symbol   | String |     Y     | Traded currency pair -- separated by /.  Such as ETH/USDT. |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -115,33 +119,33 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 市场id   |
-| low        |  Decimal   | 市场最低价   |
-| high        |  Decimal   | 市场最高价   |
-| last        |  Decimal   | 市场最新价   |
-| open       |  Decimal   | 市场开盘价   |
-| sell       |  Decimal   | 卖一价   |
-| buy       |  Long   | 买一价   |
-| volume       |  Decimal   | 成交额（计价货币量） |
-| symbol       |  String   | 交易对   |
-| changeRate       |  Decimal   | 涨跌幅   |
+| Parameter  |  type   |          note          |
+| :--------: | :-----: | :--------------------: |
+|     id     |   Int   |       market id        |
+|    low     | Decimal |      lowest price      |
+|    high    | Decimal |     highest price      |
+|    last    | Decimal |       open price       |
+|    open    | Decimal |      latest price      |
+|    sell    | Decimal |    lowest ask price    |
+|    buy     | Decimal |   highest bid price    |
+|   volume   | Decimal | volume (by quote unit) |
+|   symbol   | String  |  traded currency pair  |
+| changeRate | Decimal |    change in price     |
 
 
-## **所有交易对的最新Tickers**
+## **Snapshot of all Currency Pairs**
 
 * GET `/apis/api/market/tickers`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| none        | none   |  none   |  none   |
+| Parameter | TYPE | Mandatory | note |
+| :-------: | :--: | :-------: | :--: |
+|   none    | none |   none    | none |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -177,33 +181,33 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 市场id   |
-| low        |  Decimal   | 市场最低价   |
-| high        |  Decimal   | 市场最高价   |
-| last        |  Decimal   | 市场最新价   |
-| open       |  Decimal   | 市场开盘价   |
-| volume       |  Decimal   | 成交额（计价货币量） |
-| symbol       |  String   | 交易对   |
-| changeRate       |  Decimal   | 涨跌幅   |
-| sell       |  Decimal   | 卖一价   |
-| buy       |  Long   | 买一价   |
+| Parameter  |  type   |          note          |
+| :--------: | :-----: | :--------------------: |
+|     id     |   Int   |       market id        |
+|    low     | Decimal |      lowest price      |
+|    high    | Decimal |     highest price      |
+|    last    | Decimal |       open price       |
+|    open    | Decimal |      latest price      |
+|   volume   | Decimal | volume (by quote unit) |
+|   symbol   | String  |  traded currency pair  |
+| changeRate | Decimal |    change in price     |
+|    sell    | Decimal |    lowest ask price    |
+|    buy     |  Long   |   highest bid price    |
 
 
-## **市场深度**
+## **Market Depth**
 
 * GET `/apis/api/market/depth`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| symbol        | String   |  是   |  市场名称 币种名称后面需要加"/"和板块名称(btc/usdt)  |
+| Parameter |  TYPE  | Mandatory |                            note                            |
+| :-------: | :----: | :-------: | :--------------------------------------------------------: |
+|  symbol   | String |     Y     | Traded currency pair -- separated by /.  Such as ETH/USDT. |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -232,28 +236,28 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  String   | id   |
-| marketId        |  Int   | 市场id   |
-| price       |  Decimal   | 价格   |
-| volume       |  Decimal   | 销售额   |
-| qty       |  Decimal   | 数量   |
+| Parameter |  type   |                  note                  |
+| :-------: | :-----: | :------------------------------------: |
+|    id     | String  |          id of a market depth          |
+| marketId  |   Int   |               market id                |
+|   price   | Decimal |                 price                  |
+|  volume   | Decimal | total market value at this price level |
+|    qty    | Decimal |      quantity at this price level      |
 
 
-## **市场最近成交记录**
+## **Latest Transactions**
 
 * GET `/apis/api/market/trade`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| symbol        | String   |  是  |  市场名称 币种名称后面需要加"/"和板块名称(btc/usdt)   |
+| Parameter |  TYPE  | Mandatory |                            note                            |
+| :-------: | :----: | :-------: | :--------------------------------------------------------: |
+|  symbol   | String |     Y     | Traded currency pair -- separated by /.  Such as ETH/USDT. |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -284,38 +288,37 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  String   | id   |
-| price       |  Decimal   | 价格   |
-| qty       |  Decimal   | 数量   |
-| type       |  Int   | 买卖类型 1 买 2 卖   |
-| createTime       |  Long   | 成交时间戳   |
-| doublePrice       |  double   | 成交价格 double类型  |
+|  Parameter  |  type   |                     note                     |
+| :---------: | :-----: | :------------------------------------------: |
+|     id      | String  |                transaction id                |
+|    price    | Decimal |               transacted price               |
+|     qty     | Decimal |        quantity of assets transacted         |
+|    type     |   Int   | direction of transactions, 1 - buy, 2 - sell |
+| createTime  |  Long   |            transaction timestamp             |
+| doublePrice | double  |               transacted price               |
 
 
-## **下单**
+## **Place Order**
 
 * POST `/apis/api/member/addOrder`
-***(注意：API下单时需关闭交易密码)***
+  ***(Note：Users need turn off trading password for placing order by API)***
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey        | String   |  是  |  用户申请的密钥 |
-| sign        | String   |  是  |  参数签名|
-| symbol        | String   |  是  | 交易对(如btc/usdt) |
-| category        | Int   |  是  |1 限价单 2市价单|
-| type        | Int   |  是  |1 买入 2 卖出|
-| price        | Decimal   |  否  |价格(当订单类型是限价单时需传入，即 category=1时)   |
-| total        | Decimal   |  否  |  总额(当订单类型是市价单时并且是买入时传入，即 category=2并且type=1时total需要传入  |
-| qty        | Decimal   |  否  |  数量(限价单的买入卖出，市价单的卖出时传入)   |
+| Parameter |  TYPE   | Mandatory |                             note                             |
+| :-------: | :-----: | :-------: | :----------------------------------------------------------: |
+|  apiKey   | String  |     Y     |                       client’s api key                       |
+|   sign    | String  |     Y     |                          signature                           |
+|  symbol   | String  |     Y     |  Traded currency pair -- separated by /.  Such as ETH/USDT.  |
+| category  |   Int   |     Y     |                 Order type, 1 Limit 2 Market                 |
+|   type    |   Int   |     Y     |                         1 Buy 2 Sell                         |
+|   price   | Decimal |     N     |               price, mandatory when category=1               |
+|   total   | Decimal |     N     |      total amount, mandatory when category=2 and type=1      |
+|    qty    | Decimal |     N     | Quantity, mandatory when category=1 or category=2 and type = 2 |
 
-
-**返回值说明**
+**Return Example**
 
 ```json
 {
@@ -328,25 +331,26 @@
 }
 ```
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| orderId        |  String   | 订单id   |
+**Return Parameters**
+
+| Parameter |  type  |   note   |
+| :-------: | :----: | :------: |
+|  orderId  | String | Order id |
 
 
-## **撤销订单**
+## **Cancel Order**
 
 * GET `/apis/api/member/cancelOrder`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey        | String   |  是  |  用户申请的密钥 |
-| sign        | String   |  是  |  参数签名|
-| id        | String   |  是  | 订单id |
+| Parameter |  TYPE  | Mandatory |            note             |
+| :-------: | :----: | :-------: | :-------------------------: |
+|  apiKey   | String |     Y     |      client’s api key       |
+|   sign    | String |     Y     |          signature          |
+|    id     | String |     Y     | id of order to be cancelled |
 
-
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -357,25 +361,25 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| none        |  none   | none   |
+| Parameter | type | note |
+| :-------: | :--: | :--: |
+|   none    | none | none |
 
 
-## **账户信息**
+## **Account Information**
 
 * GET `/apis/api/member/accounts`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey        | String   |  是  |  用户申请的密钥 |
-| sign        | String   |  是  |  参数签名|
+| Parameter |  TYPE  | Mandatory |       note       |
+| :-------: | :----: | :-------: | :--------------: |
+|  apiKey   | String |     Y     | client’s api key |
+|   sign    | String |     Y     |    signature     |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -417,29 +421,29 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| balance        |  Decimal   | 可用余额   |
-| freezingBalance        |  Decimal   | 冻结余额   |
-| total        |  Decimal   | 总余额   |
-| coinName        |  String   | 币种名称   |
+|    Parameter    |  type   |                  note                  |
+| :-------------: | :-----: | :------------------------------------: |
+|     balance     | Decimal |           available balance            |
+| freezingBalance | Decimal | frozen balance for margin requirements |
+|      total      | Decimal |             total balance              |
+|    coinName     | String  |             name of a coin             |
 
-## **查询用户订单**
+## **Order Lookup**
 
 * GET `/apis/api/member/queryOrder`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey        | String   |  是  |  用户申请的密钥 |
-| sign        | String   |  是  |  参数签名|
-| symbol        | String   |  是  |  交易对|
-| status        | Int   |  是  |  订单状态-1已撤单 0已下单 1待撮合 2撮合中 3已完成撮合|
+| Parameter |  TYPE  | Mandatory |                             note                             |
+| :-------: | :----: | :-------: | :----------------------------------------------------------: |
+|  apiKey   | String |     Y     |                       client’s api key                       |
+|   sign    | String |     Y     |                          signature                           |
+|  symbol   | String |     Y     |  Traded currency pair -- separated by /.  Such as ETH/USDT   |
+|  status   |  Int   |     Y     | status of an order, -1 – order cancelled, 0 – order placed, 1 – fill pending, 2 – fill in progress, 3 – order filled |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -471,34 +475,33 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 订单id   |
-| type        |  Int   | 订单类型  1 限价 2 市价   |
-| direction        |  Int   | 方向 1买 2 卖   |
-| price        |  Decimal   | 下单价格   |
-| qty        |  Decimal   | 下单数量   |
-| tradeQty        |  Decimal   | 已成交数量   |
-| status        |  Int   | 状态-1已撤单 0已下单 1待撮合 2撮合中 3已完成撮合   |
-| createTime        |  Long   | 订单生成时间戳   |
+| Parameter  |  type   |                             note                             |
+| :--------: | :-----: | :----------------------------------------------------------: |
+|     id     |   Int   |                           order id                           |
+|    type    |   Int   |               type of order, 1 limit, 2 market               |
+| direction  |   Int   |              direction of order, 1 buy, 2 sell               |
+|   price    | Decimal |                         order price                          |
+|    qty     | Decimal |                        order quantity                        |
+|  tradeQty  | Decimal |                       filled quantity                        |
+|   status   |   Int   | status of an order, -1 – order cancelled, 0 – order placed, 1 – fill pending, 2 – fill in progress, 3 – order filled |
+| createTime |  Long   |                   Order created Timestamp                    |
 
 
-## **查询用户成交记录**
+## **Transaction History Lookup**
 
 * GET `/apis/api/member/queryTrade`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apiKey        | String   |  是  |  用户申请的密钥 |
-| sign        | String   |  是  |  参数签名|
-| symbol        | String   |  是  |  交易对|
+| Parameter |  TYPE  | Mandatory |                           note                            |
+| :-------: | :----: | :-------: | :-------------------------------------------------------: |
+|  apiKey   | String |     Y     |                     client’s api key                      |
+|   sign    | String |     Y     |                         signature                         |
+|  symbol   | String |     Y     | Traded currency pair -- separated by /.  Such as ETH/USDT |
 
-
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -519,30 +522,30 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | id   |
-| qty        |  Decimal   | 成交数量  |
-| amount        |  Decimal   | 销售额  |
-| type        |  String   | 买卖类型 Buy sell  |
-| price        |  Decimal   | 成交价格   |
-| createTimeMs        |  Long   | 成交时间 毫秒   |
-| createTime        |  String   | 成交时间   |
+|  Parameter   |  type   |              note               |
+| :----------: | :-----: | :-----------------------------: |
+|      id      |   Int   |         transaction id          |
+|     qty      | Decimal |            quantity             |
+|    amount    | Decimal |    total price paid/received    |
+|     type     | String  |  direction of order, buy/sell   |
+|    price     | Decimal |       average fill price        |
+| createTimeMs |  Long   | transacted time in milliseconds |
+|  createTime  | String  |         transacted time         |
 
 
-## **查询市场详情**
+## **Market Information**
 
 * GET `/apis/api/marketInfo`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| symbol        | String   |  否  |  交易对|
+| Parameter |  TYPE  | Mandatory |                           note                            |
+| :-------: | :----: | :-------: | :-------------------------------------------------------: |
+|  symbol   | String |     N     | Traded currency pair -- separated by /.  Such as ETH/USDT |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -566,34 +569,34 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | id   |
-| marketName        |  String   | 市场名称  |
-| categoryCoin        |  String   | 计价货币  |
-| marketCoin        |  String   | 基础货币  |
-| minTotal        |  Decimal   | 最小交易额  |
-| maxTotal        |  Decimal   | 最大交易额  |
-| minQty        |  Decimal   | 最小交易数   |
-| maxQty        |  Decimal   | 最大交易数   |
-| priceDecimal        |  Decimal   | 价格小数位   |
-| qtyDecimal        |  Decimal   | 数量小数位   |
+|  Parameter   |  type   |           note            |
+| :----------: | :-----: | :-----------------------: |
+|      id      |   Int   |         Market id         |
+|  marketName  | String  |        Market name        |
+| categoryCoin | String  |        quote coin         |
+|  marketCoin  | String  |         base coin         |
+|   minTotal   | Decimal |  Minimum tradable total   |
+|   maxTotal   | Decimal |  Maximum tradable total   |
+|    minQty    | Decimal | Minimum tradable quantity |
+|    maxQty    | Decimal | Maximum tradable quantity |
+| priceDecimal | Decimal |      Price precision      |
+|  qtyDecimal  | Decimal |    Quantity precision     |
 
-## **查询订单详情**
+## **Order History Lookup**
 
 * GET `/apis/api/member/queryOrderInfo`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apikey        | String   |  是  |  apiKey|
-| sign        | String   |  是  |  参数签名|
-| orderId        | String   |  是  |  订单id|
+| Parameter |  TYPE  | Mandatory |                           note                            |
+| :-------: | :----: | :-------: | :-------------------------------------------------------: |
+|  apikey   | String |     Y     |                          apiKey                           |
+|   sign    | String |     Y     |                         signature                         |
+|  orderId  | String |     Y     | Traded currency pair -- separated by /.  Such as ETH/USDT |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -625,41 +628,41 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 订单id   |
-| direction        |  Int   | 订单方向  1 买入 2 卖出 |
-| type        |  Int   | 订单分类 1 限价 2 市价 |
-| price        |  Decimal   | 下单价格  |
-| qty        |  Decimal   | 下单数   |
-| tradeQty        |  Decimal   | 已成交数   |
-| status        |  Int   | 状态   |
-| detail        |  Object   |  成交详情  |
-| amount        |  Decimal   | 成交额   |
-| createTime        |  Long   | 成交时间   |
-| price         |  Decimal   | 成交价格   |
-| qty        |  Decimal   | 成交数量   |
-| fee        |  Decimal   | 手续费   |
-| feeCoinName        |  String   | 手续费币种   |
-| id        |  String   | 成交id   |
-| createTimeMs        |  Long   | 成交时间 毫秒   |
+|  Parameter   |  type   |               note                |
+| :----------: | :-----: | :-------------------------------: |
+|      id      |   Int   |             Order Id              |
+|  direction   |   Int   | direction of order, 1 buy, 2 sell |
+|     type     |   Int   | type of order, 1 limit, 2 market  |
+|    price     | Decimal |            Order price            |
+|     qty      | Decimal |          Order quantity           |
+|   tradeQty   | Decimal |          Filled quantity          |
+|    status    |   Int   |           Order status            |
+|    detail    | Object  |        Transaction details        |
+|    amount    | Decimal |           Filled amount           |
+|  createTime  |  Long   |         Filled timestamp          |
+|    price     | Decimal |           Filled price            |
+|     qty      | Decimal |          Filled quantity          |
+|     fee      | Decimal |          Transaction fee          |
+| feeCoinName  | String  |      Fee’s settled coin name      |
+|      id      | String  |          Transaction Id           |
+| createTimeMs |  Long   |    Order created ms timestamp     |
 
 
-## **查询充值记录**
+## **Deposit Record Lookup**
 
 * POST `/apis/api/member/rechargeRecords`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apikey        | String   |  是  |  apiKey|
-| sign        | String   |  是  |  参数签名|
-| coinName        | String   |  否  |  币种名称|
+| Parameter |  TYPE  | Mandatory |   note    |
+| :-------: | :----: | :-------: | :-------: |
+|  apikey   | String |     Y     |  apiKey   |
+|   sign    | String |     Y     | signature |
+| coinName  | String |     N     | coin name |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -730,37 +733,37 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 充值记录id   |
-| coinName        |  String   | 币种名称   |
-| status        |  Int   | 充值状态  processing 进行中  completed 已完成  failed 充值失败|
-| blockConfirm        |  Int   | 区块确认数 |
-| blockConfirmTotal        |  Int   | 入账所需区块确认数 |
-| memo        |  Stirng   | memo  |
-| txId        |  String   | 哈希值   |
-| fromAddress        |  String   | 充值来源地址   |
-| toAddress        |  String   | 充值地址   |
-| qty        |  Decimal   | 充值数量   |
-| browser        |  String   | 区块浏览器地址   |
-| createTime        |  Long   | 创建时间   |
+|     Parameter     |  type   |                     note                      |
+| :---------------: | :-----: | :-------------------------------------------: |
+|        id         |   Int   |               deposit record id               |
+|     coinName      | String  |                   coin name                   |
+|      status       |   Int   | deposit status, processing, completed, failed |
+|   blockConfirm    |   Int   |            number of confirmations            |
+| blockConfirmTotal |   Int   |       required number of confirmations        |
+|       memo        | Stirng  |                     memo                      |
+|       txId        | String  |               transaction hash                |
+|    fromAddress    | String  |                 from address                  |
+|     toAddress     | String  |                  to address                   |
+|        qty        | Decimal |               deposit quantity                |
+|      browser      | String  |              blockchain explorer              |
+|    createTime     |  Long   |           creation timestamp in ms            |
 
 
-## **查询提现记录**
+## **Withdraw Record Lookup**
 
 * POST `/apis/api/member/withdrawRecords`
 
-**请求参数**
+**Request Parameters** 
 
-| 参数        | 类型   |  是否必须   |  说明   |
-| :--------:   | :-----:  |  :-----:  |  :-----:  |
-| apikey        | String   |  是  |  apiKey|
-| sign        | String   |  是  |  参数签名|
-| coinName        | String   |  否  |  币种名称|
+| Parameter |  TYPE  | Mandatory |   note    |
+| :-------: | :----: | :-------: | :-------: |
+|  apikey   | String |     Y     |  apiKey   |
+|   sign    | String |     Y     | signature |
+| coinName  | String |     N     | coin name |
 
-**返回值**
+**Return Example**
 
 ```json
 {
@@ -809,17 +812,17 @@
 }
 ```
 
-**返回值说明**
+**Return Parameters**
 
-| 返回值        |  类型   | 说明 |
-| :--------:   | :-----:  | :-----:  |
-| id        |  Int   | 提现记录id   |
-| coinName        |  String   | 币种名称   |
-| status        |  Int   | 提现状态 processing 进行中  completed 已完成  failed 提现失败 |
-| memo        |  Stirng   | memo  |
-| txId        |  String   | 哈希值   |
-| toAddress        |  String   | 提现地址   |
-| qty        |  Decimal   | 提现数量   |
-| fee        |  Decimal   | 提现手续费 |
-| browser        |  String   | 区块浏览器地址   |
-| createTime        |  Long   | 提现时间   |
+| Parameter  |  type   |                      note                      |
+| :--------: | :-----: | :--------------------------------------------: |
+|     id     |   Int   |               withdraw record id               |
+|  coinName  | String  |                   coin name                    |
+|   status   |   Int   | withdraw status, processing, completed, failed |
+|    memo    | Stirng  |                      memo                      |
+|    txId    | String  |                transaction hash                |
+| toAddress  | String  |                   to address                   |
+|    qty     | Decimal |               withdraw quantity                |
+|    fee     | Decimal |                  withdraw fee                  |
+|  browser   | String  |              blockchain explorer               |
+| createTime |  Long   |            creation timestamp in ms            |
